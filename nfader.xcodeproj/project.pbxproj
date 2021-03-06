@@ -7,8 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A36F4D0025F40286004D58EA /* nfader~.pd_darwin in CopyFiles */ = {isa = PBXBuildFile; fileRef = A38CAD7225E6BB0D00D8F688 /* nfader~.pd_darwin */; };
 		A38CAD7B25E6BC9B00D8F688 /* nfader.c in Sources */ = {isa = PBXBuildFile; fileRef = A38CAD7A25E6BC9B00D8F688 /* nfader.c */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A36F4CFF25F4026D004D58EA /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /Users/morpheu5/Documents/Pd;
+			dstSubfolderSpec = 0;
+			files = (
+				A36F4D0025F40286004D58EA /* nfader~.pd_darwin in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		A38CAD7225E6BB0D00D8F688 /* nfader~.pd_darwin */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = "nfader~.pd_darwin"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -62,6 +76,7 @@
 				A38CAD6E25E6BB0D00D8F688 /* Headers */,
 				A38CAD6F25E6BB0D00D8F688 /* Sources */,
 				A38CAD7025E6BB0D00D8F688 /* Frameworks */,
+				A36F4CFF25F4026D004D58EA /* CopyFiles */,
 			);
 			buildRules = (
 			);

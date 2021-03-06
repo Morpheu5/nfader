@@ -10,7 +10,7 @@ typedef struct _nfader_tilde {
     t_int n;
     t_float t;
     t_inlet *in_t;
-    t_signal **in_vec;
+    t_inlet **in_vec;
     t_outlet *out;
 } t_nfader_tilde;
 
@@ -20,9 +20,9 @@ void *nfader_new(t_floatarg n) {
     x->n = (t_int)floor(n < 2 ? 2 : n);
     x->t = 0.0f;
     x->in_t = floatinlet_new((t_object *)x, &x->t);
-    x->in_vec = (t_signal **)getbytes(n * sizeof(t_signal *));
+    x->in_vec = (t_inlet **)getbytes(n * sizeof(t_inlet *));
     for (int i = 0; i < x->n; ++i) {
-        x->in_vec[i] = (t_signal *)signalinlet_new((t_object *)x, 0.0f); // (&x->x_obj, &x->x_obj.ob_pd, &s_signal, &s_signal);
+        x->in_vec[i] = signalinlet_new((t_object *)x, 0.0f);
     }
     x->out = outlet_new((t_object *)x, &s_signal);
 
@@ -44,11 +44,12 @@ t_int *nfader_tilde_perform(t_int *w) {
     t_sample *out = (t_sample *)w[3];
     int bs = (int)w[4];
 
-    t_signal *in1 = in_vec[0];
-    t_sample *in = in1->s_vec;
+    long n = x->n;
+    float t = fmaxf(0, fminf(x->t, n));
+    int a = (int)floor(t);
 
     for (int i = 0; i < bs; ++i) {
-        out[i] = x->t;// in[i];
+        out[i] = (1-t)*in_vec[a]->s_vec[i] + t*in_vec[a+1]->s_vec[i];
     }
 
     return w+5;
