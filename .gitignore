@@ -18,4 +18,5 @@ DerivedData
 .idea/
 *.hmap
 logs/
-screenshots/*/xcshareddata/*
+screenshots/
+*/xcshareddata/*
