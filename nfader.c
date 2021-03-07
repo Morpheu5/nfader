@@ -10,7 +10,8 @@ typedef struct _nfader_tilde {
     t_int n;
     t_float t;
     t_inlet *in_t;
-    t_float **in_vec;
+    t_float **signals;
+    t_inlet **inlets;
     t_outlet *out;
 } t_nfader_tilde;
 
@@ -20,9 +21,10 @@ void *nfader_new(t_floatarg n) {
     x->n = (t_int)floor(n < 2 ? 2 : n);
     x->t = 0.0f;
     x->in_t = floatinlet_new((t_object *)x, &x->t);
-    x->in_vec = (t_float **)getbytes(n * sizeof(t_float *));
+    x->signals = (t_float **)getbytes(n * sizeof(t_float *));
+    x->inlets = (t_inlet **)getbytes(n * sizeof(t_inlet *));
     for (int i = 0; i < x->n; ++i) {
-        signalinlet_new((t_object *)x, 0.0f);
+        x->inlets[i] = signalinlet_new((t_object *)x, 0.0f);
     }
     x->out = outlet_new((t_object *)x, &s_signal);
 
@@ -31,9 +33,10 @@ void *nfader_new(t_floatarg n) {
 
 void nfader_free(t_nfader_tilde *x) {
     for (int i = 0; i < x->n; ++i) {
-        inlet_free((t_inlet *)x->in_vec[i]);
+        inlet_free((t_inlet *)x->inlets[i]);
     }
-    freebytes(x->in_vec, x->n * sizeof(t_inlet *));
+    freebytes(x->inlets, x->n * sizeof(t_inlet *));
+    freebytes(x->signals, x->n * sizeof(t_float *));
     inlet_free(x->in_t);
     outlet_free(x->out);
 }
@@ -44,11 +47,25 @@ t_int *nfader_tilde_perform(t_int *w) {
     int bs = (int)w[3];
 
     long n = x->n;
-    float t = fmaxf(0, fminf(x->t, n));
-    int a = (int)floor(t);
+#if PD_FLOATSIZE == 32
+    t_float t = fmaxf(0, fminf(x->t, 1));
+    t_float nt = (n-1) * t;
+    t_float ft = fmodf(nt, 1);
+#elif PD_FLOATSIZE == 64
+    t_float t = fmax(0, fmin(x->t, 1));
+    t_float nt = (n-1) * t;
+    t_float ft = fmod(nt, 1);
+#else
+#error
+#endif
+    int a = (int)floor(fmin(nt, n-1));
 
     for (int i = 0; i < bs; ++i) {
-        out[i] = (1-t)*x->in_vec[a][i] + t*x->in_vec[a+1][i];
+        if (a < n-1) {
+            out[i] = (1-ft)*x->signals[a][i] + ft*x->signals[a+1][i];
+        } else {
+            out[i] = x->signals[a][i];
+        }
     }
 
     return w+4;
@@ -56,7 +73,7 @@ t_int *nfader_tilde_perform(t_int *w) {
 
 void nfader_tilde_dsp(t_nfader_tilde *x, t_signal **sp) {
     for (int i = 0; i < x->n; ++i) {
-        x->in_vec[i] = sp[i]->s_vec;
+        x->signals[i] = sp[i]->s_vec;
     }
     dsp_add(nfader_tilde_perform, 3, x, sp[x->n]->s_vec, (t_int)sp[0]->s_n);
 }
@@ -73,4 +90,6 @@ void nfader_tilde_setup(void) {
     class_addmethod(nfader_tilde_class,
                     (t_method)nfader_tilde_dsp,
                     gensym("dsp"), A_CANT, 0);
+
+    class_sethelpsymbol(nfader_tilde_class, gensym("nfader~"));
 }

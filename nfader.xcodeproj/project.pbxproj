@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A318D56725F4F251008E45C2 /* nfader~-help.pd in CopyFiles */ = {isa = PBXBuildFile; fileRef = A318D56625F4F244008E45C2 /* nfader~-help.pd */; };
 		A36F4D0025F40286004D58EA /* nfader~.pd_darwin in CopyFiles */ = {isa = PBXBuildFile; fileRef = A38CAD7225E6BB0D00D8F688 /* nfader~.pd_darwin */; };
 		A38CAD7B25E6BC9B00D8F688 /* nfader.c in Sources */ = {isa = PBXBuildFile; fileRef = A38CAD7A25E6BC9B00D8F688 /* nfader.c */; };
 /* End PBXBuildFile section */
@@ -18,6 +19,7 @@
 			dstPath = /Users/morpheu5/Documents/Pd;
 			dstSubfolderSpec = 0;
 			files = (
+				A318D56725F4F251008E45C2 /* nfader~-help.pd in CopyFiles */,
 				A36F4D0025F40286004D58EA /* nfader~.pd_darwin in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -25,6 +27,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A318D56625F4F244008E45C2 /* nfader~-help.pd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "nfader~-help.pd"; sourceTree = "<group>"; };
 		A38CAD7225E6BB0D00D8F688 /* nfader~.pd_darwin */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = "nfader~.pd_darwin"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A38CAD7A25E6BC9B00D8F688 /* nfader.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nfader.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -43,6 +46,7 @@
 		A38CAD6925E6BB0D00D8F688 = {
 			isa = PBXGroup;
 			children = (
+				A318D56625F4F244008E45C2 /* nfader~-help.pd */,
 				A38CAD7A25E6BC9B00D8F688 /* nfader.c */,
 				A38CAD7325E6BB0D00D8F688 /* Products */,
 			);
