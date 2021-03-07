@@ -8,8 +8,6 @@ typedef struct _nfader_tilde {
     t_object x_obj;
     t_float x_f;
     t_int n;
-    t_float t;
-    t_inlet *in_t;
     t_float **signals;
     t_inlet **inlets;
     t_outlet *out;
@@ -19,11 +17,9 @@ void *nfader_new(t_floatarg n) {
     t_nfader_tilde *x = (t_nfader_tilde *)pd_new(nfader_tilde_class);
 
     x->n = (t_int)floor(n < 2 ? 2 : n);
-    x->t = 0.0f;
-    x->in_t = floatinlet_new((t_object *)x, &x->t);
-    x->signals = (t_float **)getbytes(n * sizeof(t_float *));
-    x->inlets = (t_inlet **)getbytes(n * sizeof(t_inlet *));
-    for (int i = 0; i < x->n; ++i) {
+    x->signals = (t_float **)getbytes((x->n + 1) * sizeof(t_float *));
+    x->inlets = (t_inlet **)getbytes((x->n + 1) * sizeof(t_inlet *));
+    for (int i = 0; i < x->n+1; ++i) {
         x->inlets[i] = signalinlet_new((t_object *)x, 0.0f);
     }
     x->out = outlet_new((t_object *)x, &s_signal);
@@ -32,12 +28,11 @@ void *nfader_new(t_floatarg n) {
 }
 
 void nfader_free(t_nfader_tilde *x) {
-    for (int i = 0; i < x->n; ++i) {
+    for (int i = 0; i < x->n+1; ++i) {
         inlet_free((t_inlet *)x->inlets[i]);
     }
-    freebytes(x->inlets, x->n * sizeof(t_inlet *));
-    freebytes(x->signals, x->n * sizeof(t_float *));
-    inlet_free(x->in_t);
+    freebytes(x->inlets, (x->n+1) * sizeof(t_inlet *));
+    freebytes(x->signals, (x->n+1) * sizeof(t_float *));
     outlet_free(x->out);
 }
 
@@ -47,21 +42,20 @@ t_int *nfader_tilde_perform(t_int *w) {
     int bs = (int)w[3];
 
     long n = x->n;
-#if PD_FLOATSIZE == 32
-    t_float t = fmaxf(0, fminf(x->t, 1));
-    t_float nt = (n-1) * t;
-    t_float ft = fmodf(nt, 1);
-#elif PD_FLOATSIZE == 64
-    t_float t = fmax(0, fmin(x->t, 1));
-    t_float nt = (n-1) * t;
-    t_float ft = fmod(nt, 1);
-#else
-#error
-#endif
-    int a = (int)floor(fmin(nt, n-1));
-
     for (int i = 0; i < bs; ++i) {
-        if (a < n-1) {
+#if PD_FLOATSIZE == 32
+        t_float t = fmaxf(0, fminf(x->signals[0][i], 1));
+        t_float nt = (n-1)*t;
+        t_float ft = fmodf(nt, 1);
+#elif PD_FLOATSIZE == 64
+        t_float t = fmax(0, fmin(x->signals[0][i], 1));
+        t_float nt = (n-1)*t;
+        t_float ft = fmod(nt, 1);
+#else
+#error "PD_FLOATSIZE is neither 32 nor 64 bits."
+#endif
+        long a = (long)floor(fmin(nt, n-1)) + 1;
+        if (a < n) {
             out[i] = (1-ft)*x->signals[a][i] + ft*x->signals[a+1][i];
         } else {
             out[i] = x->signals[a][i];
@@ -72,10 +66,10 @@ t_int *nfader_tilde_perform(t_int *w) {
 }
 
 void nfader_tilde_dsp(t_nfader_tilde *x, t_signal **sp) {
-    for (int i = 0; i < x->n; ++i) {
+    for (int i = 0; i < x->n+1; ++i) {
         x->signals[i] = sp[i]->s_vec;
     }
-    dsp_add(nfader_tilde_perform, 3, x, sp[x->n]->s_vec, (t_int)sp[0]->s_n);
+    dsp_add(nfader_tilde_perform, 3, x, sp[x->n+1]->s_vec, (t_int)sp[0]->s_n);
 }
 
 void nfader_tilde_setup(void) {
