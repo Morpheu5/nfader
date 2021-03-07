@@ -47,14 +47,15 @@ t_int *nfader_tilde_perform(t_int *w) {
         t_float t = fmaxf(0, fminf(x->signals[0][i], 1));
         t_float nt = (n-1)*t;
         t_float ft = fmodf(nt, 1);
+        long a = (long)floor(fminf(nt, n-1)) + 1;
 #elif PD_FLOATSIZE == 64
         t_float t = fmax(0, fmin(x->signals[0][i], 1));
         t_float nt = (n-1)*t;
         t_float ft = fmod(nt, 1);
+        long a = (long)floor(fmin(nt, n-1)) + 1;
 #else
 #error "PD_FLOATSIZE is neither 32 nor 64 bits."
 #endif
-        long a = (long)floor(fmin(nt, n-1)) + 1;
         if (a < n) {
             out[i] = (1-ft)*x->signals[a][i] + ft*x->signals[a+1][i];
         } else {
